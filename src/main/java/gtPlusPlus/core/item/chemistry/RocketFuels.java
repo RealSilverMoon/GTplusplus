@@ -1,5 +1,10 @@
 package gtPlusPlus.core.item.chemistry;
 
+import static gregtech.api.recipe.RecipeMaps.distilleryRecipes;
+import static gregtech.api.recipe.RecipeMaps.mixerRecipes;
+import static gregtech.api.recipe.RecipeMaps.vacuumFreezerRecipes;
+import static gregtech.api.util.GT_RecipeBuilder.SECONDS;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -12,8 +17,13 @@ import net.minecraftforge.fluids.FluidStack;
 
 import gregtech.api.enums.GT_Values;
 import gregtech.api.enums.Materials;
-import gregtech.api.util.GTPP_Recipe;
+import gregtech.api.enums.OrePrefixes;
+import gregtech.api.enums.TierEU;
+import gregtech.api.util.GT_OreDictUnificator;
+import gregtech.api.util.GT_Recipe;
+import gregtech.api.util.GT_Utility;
 import gtPlusPlus.api.objects.minecraft.ItemPackage;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.item.base.BaseItemComponent;
 import gtPlusPlus.core.lib.CORE;
 import gtPlusPlus.core.recipe.common.CI;
@@ -24,8 +34,8 @@ import gtPlusPlus.core.util.minecraft.MaterialUtils;
 
 public class RocketFuels extends ItemPackage {
 
-    public static HashSet<String> mValidRocketFuelNames = new HashSet<String>();
-    public static HashMap<Integer, Fluid> mValidRocketFuels = new HashMap<Integer, Fluid>();
+    public static HashSet<String> mValidRocketFuelNames = new HashSet<>();
+    public static HashMap<Integer, Fluid> mValidRocketFuels = new HashMap<>();
 
     public static Fluid Oil_Heavy;
     public static Fluid Diesel;
@@ -61,37 +71,23 @@ public class RocketFuels extends ItemPackage {
         FluidStack fuelB = FluidUtils.getFluidStack("fuel", 3000);
 
         if (fuelA != null) {
-            // GT_Values.RA.addDistilleryRecipe(23, fuelA, FluidUtils.getFluidStack(Kerosene, 50), 200, 64, false);
-            GT_Values.RA.addDistilleryRecipe(
-                    CI.getNumberedCircuit(23),
-                    fuelA,
-                    FluidUtils.getFluidStack(Kerosene, 1800),
-                    200,
-                    64,
-                    false);
+            GT_Values.RA.stdBuilder().itemInputs(GT_Utility.getIntegratedCircuit(23)).fluidInputs(fuelA)
+                    .fluidOutputs(FluidUtils.getFluidStack(Kerosene, 1800)).duration(10 * SECONDS)
+                    .eut(TierEU.RECIPE_MV / 2).addTo(distilleryRecipes);
         }
         if (fuelA == null && fuelB != null) {
-            // GT_Values.RA.addDistilleryRecipe(23, fuelB, FluidUtils.getFluidStack(Kerosene, 50), 200, 64, false);
-            GT_Values.RA.addDistilleryRecipe(
-                    CI.getNumberedCircuit(23),
-                    fuelB,
-                    FluidUtils.getFluidStack(Kerosene, 1800),
-                    200,
-                    64,
-                    false);
+            GT_Values.RA.stdBuilder().itemInputs(GT_Utility.getIntegratedCircuit(23)).fluidInputs(fuelB)
+                    .fluidOutputs(FluidUtils.getFluidStack(Kerosene, 1800)).duration(10 * SECONDS)
+                    .eut(TierEU.RECIPE_MV / 2).addTo(distilleryRecipes);
         }
     }
 
     public static void createRP1() {
         FluidStack fuelA = FluidUtils.getFluidStack(Kerosene, 1000);
         if (fuelA != null) {
-            GT_Values.RA.addDistilleryRecipe(
-                    CI.getNumberedCircuit(23),
-                    fuelA,
-                    FluidUtils.getFluidStack(RP1, 750),
-                    20 * 40,
-                    120,
-                    false);
+            GT_Values.RA.stdBuilder().itemInputs(GT_Utility.getIntegratedCircuit(23)).fluidInputs(fuelA)
+                    .fluidOutputs(FluidUtils.getFluidStack(RP1, 750)).duration(40 * SECONDS).eut(TierEU.RECIPE_MV)
+                    .addTo(distilleryRecipes);
         }
     }
 
@@ -139,10 +135,10 @@ public class RocketFuels extends ItemPackage {
     }
 
     private static void createLOH() {
-        GT_Values.RA.addVacuumFreezerRecipe(
-                ItemUtils.getItemStackOfAmountFromOreDict("cellHydrogen", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("cellLiquidHydrogen", 1),
-                20 * 16);
+        GT_Values.RA.stdBuilder().itemInputs(ItemUtils.getItemStackOfAmountFromOreDict("cellHydrogen", 1))
+                .itemOutputs(ItemUtils.getItemStackOfAmountFromOreDict("cellLiquidHydrogen", 1)).duration(16 * SECONDS)
+                .eut(TierEU.RECIPE_MV).addTo(vacuumFreezerRecipes);
+
         CORE.RA.addAdvancedFreezerRecipe(
                 new ItemStack[] {},
                 new FluidStack[] { FluidUtils.getFluidStack("hydrogen", 300) },
@@ -195,16 +191,13 @@ public class RocketFuels extends ItemPackage {
     }
 
     private static void createFormaldehydeCatalyst() {
-        GT_Values.RA.addMixerRecipe(
-                ItemUtils.getItemStackOfAmountFromOreDict("dustIron", 16),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustVanadium", 1),
-                CI.getNumberedCircuit(18),
-                null,
-                null,
-                null,
-                ItemUtils.getSimpleStack(Formaldehyde_Catalyst_Dust, 4),
-                160,
-                30);
+        GT_Values.RA.stdBuilder()
+                .itemInputs(
+                        GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Iron, 16L),
+                        GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Vanadium, 1L),
+                        GT_Utility.getIntegratedCircuit(18))
+                .itemOutputs(ItemUtils.getSimpleStack(Formaldehyde_Catalyst_Dust, 4)).duration(8 * SECONDS)
+                .eut(TierEU.RECIPE_LV).addTo(mixerRecipes);
     }
 
     private static void createUnsymmetricalDimethylhydrazine() {
@@ -223,10 +216,10 @@ public class RocketFuels extends ItemPackage {
     }
 
     private static void addRocketFuelsToMap() {
-        HashMap<Integer, GTPP_Recipe> mRocketFuels = new LinkedHashMap<Integer, GTPP_Recipe>();
+        HashMap<Integer, GT_Recipe> mRocketFuels = new LinkedHashMap<>();
         mRocketFuels.put(
                 0,
-                new GTPP_Recipe(
+                new GT_Recipe(
                         true,
                         new ItemStack[] {},
                         new ItemStack[] {},
@@ -240,7 +233,7 @@ public class RocketFuels extends ItemPackage {
 
         mRocketFuels.put(
                 1,
-                new GTPP_Recipe(
+                new GT_Recipe(
                         true,
                         new ItemStack[] {},
                         new ItemStack[] {},
@@ -254,7 +247,7 @@ public class RocketFuels extends ItemPackage {
 
         mRocketFuels.put(
                 2,
-                new GTPP_Recipe(
+                new GT_Recipe(
                         true,
                         new ItemStack[] {},
                         new ItemStack[] {},
@@ -268,7 +261,7 @@ public class RocketFuels extends ItemPackage {
 
         mRocketFuels.put(
                 3,
-                new GTPP_Recipe(
+                new GT_Recipe(
                         true,
                         new ItemStack[] {},
                         new ItemStack[] {},
@@ -286,11 +279,11 @@ public class RocketFuels extends ItemPackage {
 
         mValidRocketFuelNames.add(FluidRegistry.getFluidName(Diesel));
         for (int mID : mRocketFuels.keySet()) {
-            GTPP_Recipe aFuelRecipe = mRocketFuels.get(mID);
+            GT_Recipe aFuelRecipe = mRocketFuels.get(mID);
             if (aFuelRecipe != null) {
                 mValidRocketFuelNames.add(FluidRegistry.getFluidName(aFuelRecipe.mFluidInputs[0].getFluid()));
                 mValidRocketFuels.put(mID, aFuelRecipe.mFluidInputs[0].getFluid());
-                GTPP_Recipe.GTPP_Recipe_Map.sRocketFuels.add(aFuelRecipe);
+                GTPPRecipeMaps.rocketFuels.add(aFuelRecipe);
             }
         }
     }

@@ -16,7 +16,11 @@ import static gregtech.api.util.GT_StructureUtility.buildHatchAdder;
 import static gregtech.api.util.GT_StructureUtility.ofHatchAdder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -40,9 +44,9 @@ import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.metatileentity.implementations.GT_MetaTileEntity_Hatch_Output;
+import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
-import gregtech.api.util.GT_Recipe;
-import gregtech.api.util.GT_Recipe.GT_Recipe_Map;
 import gregtech.api.util.GT_Utility;
 import gtPlusPlus.core.lib.CORE;
 import gtPlusPlus.core.util.minecraft.ItemUtils;
@@ -155,10 +159,9 @@ public class GregtechMetaTileEntity_Adv_DistillationTower extends
 
     protected boolean addLayerOutputHatch(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {
         if (aTileEntity == null || aTileEntity.isDead()
-                || !(aTileEntity.getMetaTileEntity() instanceof GT_MetaTileEntity_Hatch_Output))
+                || !(aTileEntity.getMetaTileEntity() instanceof GT_MetaTileEntity_Hatch_Output tHatch))
             return false;
         while (mOutputHatchesByLayer.size() < mHeight) mOutputHatchesByLayer.add(new ArrayList<>());
-        GT_MetaTileEntity_Hatch_Output tHatch = (GT_MetaTileEntity_Hatch_Output) aTileEntity.getMetaTileEntity();
         tHatch.updateTexture(aBaseCasingIndex);
         return mOutputHatchesByLayer.get(mHeight - 1).add(tHatch) && mOutputHatches.add(tHatch);
     }
@@ -261,8 +264,14 @@ public class GregtechMetaTileEntity_Adv_DistillationTower extends
     }
 
     @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeMap() {
+    public RecipeMap<?> getRecipeMap() {
         return mMode.getRecipeMap();
+    }
+
+    @Nonnull
+    @Override
+    public Collection<RecipeMap<?>> getAvailableRecipeMaps() {
+        return Arrays.asList(RecipeMaps.distilleryRecipes, RecipeMaps.distillationTowerRecipes);
     }
 
     @Override
@@ -377,14 +386,11 @@ public class GregtechMetaTileEntity_Adv_DistillationTower extends
 
     @Override
     public int getMaxParallelRecipes() {
-        switch (mMode) {
-            case DistillationTower:
-                return getTierOfTower() == 1 ? 4 : getTierOfTower() == 2 ? 12 : 0;
-            case Distillery:
-                return getTierOfTower() * (4 * GT_Utility.getTier(this.getMaxInputVoltage()));
-            default:
-                return 0;
-        }
+        return switch (mMode) {
+            case DistillationTower -> getTierOfTower() == 1 ? 4 : getTierOfTower() == 2 ? 12 : 0;
+            case Distillery -> getTierOfTower() * (4 * GT_Utility.getTier(this.getMaxInputVoltage()));
+            default -> 0;
+        };
     }
 
     private int getTierOfTower() {
@@ -437,17 +443,17 @@ public class GregtechMetaTileEntity_Adv_DistillationTower extends
 
     private enum Mode {
 
-        DistillationTower(GT_Recipe_Map.sDistillationRecipes),
-        Distillery(GT_Recipe_Map.sDistilleryRecipes),;
+        DistillationTower(RecipeMaps.distillationTowerRecipes),
+        Distillery(RecipeMaps.distilleryRecipes),;
 
         static final Mode[] VALUES = values();
-        private final GT_Recipe_Map recipeMap;
+        private final RecipeMap<?> recipeMap;
 
-        Mode(GT_Recipe_Map recipeMap) {
+        Mode(RecipeMap<?> recipeMap) {
             this.recipeMap = recipeMap;
         }
 
-        public GT_Recipe_Map getRecipeMap() {
+        public RecipeMap<?> getRecipeMap() {
             return recipeMap;
         }
 

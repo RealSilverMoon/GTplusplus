@@ -33,12 +33,13 @@ import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
-import gregtech.api.util.GT_Recipe;
 import gregtech.api.util.GT_Utility;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.core.lib.CORE;
 import gtPlusPlus.core.material.MISC_MATERIALS;
@@ -58,7 +59,7 @@ public class GregtechMetaTileEntity_SolarTower extends GregtechMeta_MultiBlockBa
     private int mCasing3;
     private int mCasing4;
 
-    public ArrayList<TileEntitySolarHeater> mSolarHeaters = new ArrayList<TileEntitySolarHeater>();
+    public ArrayList<TileEntitySolarHeater> mSolarHeaters = new ArrayList<>();
 
     public GregtechMetaTileEntity_SolarTower(final int aID, final String aName, final String aNameRegional) {
         super(aID, aName, aNameRegional);
@@ -119,7 +120,7 @@ public class GregtechMetaTileEntity_SolarTower extends GregtechMeta_MultiBlockBa
     private static final String SOLAR_HEATER_RING_4 = STRUCTURE_PIECE_SOLAR_HEATER_RING[3];
     private static final String SOLAR_HEATER_RING_5 = STRUCTURE_PIECE_SOLAR_HEATER_RING[4];
 
-    private static final ClassValue<IStructureDefinition<GregtechMetaTileEntity_SolarTower>> STRUCTURE_DEFINITION = new ClassValue<IStructureDefinition<GregtechMetaTileEntity_SolarTower>>() {
+    private static final ClassValue<IStructureDefinition<GregtechMetaTileEntity_SolarTower>> STRUCTURE_DEFINITION = new ClassValue<>() {
 
         @Override
         protected IStructureDefinition<GregtechMetaTileEntity_SolarTower> computeValue(Class<?> type) {
@@ -422,8 +423,9 @@ public class GregtechMetaTileEntity_SolarTower extends GregtechMeta_MultiBlockBa
     }
 
     @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeMap() {
-        return null;
+    public RecipeMap<?> getRecipeMap() {
+        // Only for visual
+        return GTPPRecipeMaps.solarTowerRecipes;
     }
 
     private int getHeaterTier() {
@@ -445,20 +447,14 @@ public class GregtechMetaTileEntity_SolarTower extends GregtechMeta_MultiBlockBa
     }
 
     private int getHeaterCountForTier(int aTier) {
-        switch (aTier) {
-            case 1:
-                return 36;
-            case 2:
-                return 88;
-            case 4:
-                return 156;
-            case 8:
-                return 240;
-            case 16:
-                return 340;
-            default:
-                return 0;
-        }
+        return switch (aTier) {
+            case 1 -> 36;
+            case 2 -> 88;
+            case 4 -> 156;
+            case 8 -> 240;
+            case 16 -> 340;
+            default -> 0;
+        };
     }
 
     public boolean getConnectedSolarReflectors() {
@@ -509,8 +505,7 @@ public class GregtechMetaTileEntity_SolarTower extends GregtechMeta_MultiBlockBa
             return false;
         } else {
             IMetaTileEntity aMetaTileEntity = aTileEntity.getMetaTileEntity();
-            if (aMetaTileEntity instanceof TileEntitySolarHeater) {
-                TileEntitySolarHeater mTile = (TileEntitySolarHeater) aMetaTileEntity;
+            if (aMetaTileEntity instanceof TileEntitySolarHeater mTile) {
                 if (!mTile.hasSolarTower() && mTile.canSeeSky()) {
                     // Logger.INFO("Found Solar Reflector, Injecting Data.");
                     mTile.setSolarTower(this);

@@ -5,9 +5,9 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import gregtech.api.enums.Materials;
-import gregtech.api.util.GTPP_Recipe;
 import gregtech.api.util.GasSpargingRecipeMap;
 import gtPlusPlus.api.objects.data.AutoMap;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.material.ELEMENT;
 import gtPlusPlus.core.material.nuclear.FLUORIDES;
 import gtPlusPlus.core.material.nuclear.NUCLIDE;
@@ -20,12 +20,12 @@ public class RecipeLoader_LFTR {
 
     private static void configureSparging() {
         if (mSpargeGases == null) {
-            mSpargeGases = new AutoMap<Fluid>();
+            mSpargeGases = new AutoMap<>();
             mSpargeGases.add(Materials.Helium.getGas(1).getFluid());
             mSpargeGases.add(Materials.Fluorine.getGas(1).getFluid());
         }
         if (mNobleGases == null) {
-            mNobleGases = new AutoMap<Fluid>();
+            mNobleGases = new AutoMap<>();
             mNobleGases.add(mSpargeGases.get(0));
             mNobleGases.add(ELEMENT.getInstance().XENON.getFluid());
             mNobleGases.add(ELEMENT.getInstance().NEON.getFluid());
@@ -34,7 +34,7 @@ public class RecipeLoader_LFTR {
             mNobleGases.add(ELEMENT.getInstance().RADON.getFluid());
         }
         if (mFluorideGases == null) {
-            mFluorideGases = new AutoMap<Fluid>();
+            mFluorideGases = new AutoMap<>();
             mFluorideGases.add(mSpargeGases.get(1));
             mFluorideGases.add(FLUORIDES.LITHIUM_FLUORIDE.getFluid());
             mFluorideGases.add(FLUORIDES.NEPTUNIUM_HEXAFLUORIDE.getFluid());
@@ -56,7 +56,7 @@ public class RecipeLoader_LFTR {
         FluidStack Li2BeF4 = NUCLIDE.Li2BeF4.getFluidStack(200);
 
         // LiFBeF2ThF4UF4 - T3
-        GTPP_Recipe.GTPP_Recipe_Map.sLiquidFluorineThoriumReactorRecipes.addRecipe(
+        GTPPRecipeMaps.liquidFluorineThoriumReactorRecipes.addRecipe(
                 false,
                 new ItemStack[] {},
                 new ItemStack[] {},
@@ -72,7 +72,7 @@ public class RecipeLoader_LFTR {
         );
 
         // LiFBeF2ZrF4UF4 - T2
-        GTPP_Recipe.GTPP_Recipe_Map.sLiquidFluorineThoriumReactorRecipes.addRecipe(
+        GTPPRecipeMaps.liquidFluorineThoriumReactorRecipes.addRecipe(
                 false,
                 new ItemStack[] {},
                 new ItemStack[] {},
@@ -88,7 +88,7 @@ public class RecipeLoader_LFTR {
         );
 
         // LiFBeF2ZrF4U235 - T1
-        GTPP_Recipe.GTPP_Recipe_Map.sLiquidFluorineThoriumReactorRecipes.addRecipe(
+        GTPPRecipeMaps.liquidFluorineThoriumReactorRecipes.addRecipe(
                 false,
                 new ItemStack[] {},
                 new ItemStack[] {},

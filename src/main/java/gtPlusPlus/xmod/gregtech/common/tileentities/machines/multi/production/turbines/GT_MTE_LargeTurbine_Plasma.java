@@ -15,11 +15,13 @@ import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.items.GT_MetaGenerated_Tool;
 import gregtech.api.objects.GT_RenderedTexture;
+import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
+import gregtech.api.recipe.maps.FuelBackend;
 import gregtech.api.util.GT_Recipe;
-import gregtech.api.util.GT_Recipe.GT_Recipe_Map;
 import gregtech.api.util.GT_Utility;
 import gtPlusPlus.core.util.math.MathUtils;
 import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.GT_MetaTileEntity_Hatch_Turbine;
@@ -67,11 +69,26 @@ public class GT_MTE_LargeTurbine_Plasma extends GregtechMetaTileEntity_LargerTur
         if (aLiquid == null) {
             return 0;
         }
-        GT_Recipe tFuel = GT_Recipe_Map.sPlasmaFuels.findFuel(aLiquid);
+        GT_Recipe tFuel = getRecipeMap().getBackend().findFuel(aLiquid);
         if (tFuel != null) {
             return tFuel.mSpecialValue;
         }
         return 0;
+    }
+
+    @Override
+    public RecipeMap<FuelBackend> getRecipeMap() {
+        return RecipeMaps.plasmaFuels;
+    }
+
+    @Override
+    public int getRecipeCatalystPriority() {
+        return -20;
+    }
+
+    @Override
+    protected boolean filtersFluid() {
+        return false;
     }
 
     @Override
@@ -87,7 +104,7 @@ public class GT_MTE_LargeTurbine_Plasma extends GregtechMetaTileEntity_LargerTur
                             continue;
                         }
                         if (aHatch.insertTurbine(aTurbineItem.copy())) {
-                            boolean aDidDeplete = depleteTurbineFromStock(aTurbineItem);
+                            depleteTurbineFromStock(aTurbineItem);
                             continue hatch;
                         }
                     }
@@ -160,7 +177,10 @@ public class GT_MTE_LargeTurbine_Plasma extends GregtechMetaTileEntity_LargerTur
             // Reduce produced power depending on the ratio between fuel value and turbine EU/t with the following
             // formula:
             // EU/t = EU/t * MIN(1, ( ( (FuelValue / 200) ^ 2 ) / EUPerTurbine))
-            int fuelValue = getFuelValue(new FluidStack(tFluids.get(0), 0));
+            int fuelValue = 0;
+            if (tFluids.size() > 0) {
+                fuelValue = getFuelValue(new FluidStack(tFluids.get(0), 0));
+            }
             float magicValue = (fuelValue * 0.005f) * (fuelValue * 0.005f);
             float efficiencyLoss = Math.min(1.0f, magicValue / euPerTurbine);
             newPower *= efficiencyLoss;

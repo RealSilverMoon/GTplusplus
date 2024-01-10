@@ -12,6 +12,7 @@ import static gregtech.api.enums.GT_HatchElement.Muffler;
 import static gregtech.api.enums.GT_HatchElement.OutputBus;
 import static gregtech.api.enums.GT_HatchElement.OutputHatch;
 import static gregtech.api.util.GT_StructureUtility.buildHatchAdder;
+import static gregtech.api.util.GT_Utility.filterValidMTEs;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,16 +40,17 @@ import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
+import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
-import gregtech.api.util.GTPP_Recipe;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
 import gregtech.api.util.GT_Recipe;
 import gregtech.api.util.GT_Utility;
 import gtPlusPlus.api.objects.Logger;
 import gtPlusPlus.api.objects.data.AutoMap;
 import gtPlusPlus.api.objects.minecraft.BlockPos;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.core.item.chemistry.general.ItemGenericChemBase;
 import gtPlusPlus.core.lib.CORE;
@@ -70,7 +72,7 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
     private static final IIconContainer frontFaceActive = new CustomIcon("iconsets/Grinder/GRINDER_ACTIVE5");
     private static final IIconContainer frontFace = new CustomIcon("iconsets/Grinder/GRINDER5");
 
-    private final ArrayList<GT_MetaTileEntity_Hatch_MillingBalls> mMillingBallBuses = new ArrayList<GT_MetaTileEntity_Hatch_MillingBalls>();
+    private final ArrayList<GT_MetaTileEntity_Hatch_MillingBalls> mMillingBallBuses = new ArrayList<>();
     private static final DamageSource mIsaMillDamageSource = new DamageSource("gtpp.grinder").setDamageBypassesArmor();
 
     public GregtechMetaTileEntity_IsaMill(int aID, String aName, String aNameRegional) {
@@ -199,8 +201,8 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
     }
 
     @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeMap() {
-        return GTPP_Recipe.GTPP_Recipe_Map.sOreMillRecipes;
+    public RecipeMap<?> getRecipeMap() {
+        return GTPPRecipeMaps.millingRecipes;
     }
 
     @Override
@@ -216,7 +218,7 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
         super.onPostTick(aBaseMetaTileEntity, aTick);
     }
 
-    private final AutoMap<BlockPos> mFrontBlockPosCache = new AutoMap<BlockPos>();
+    private final AutoMap<BlockPos> mFrontBlockPosCache = new AutoMap<>();
 
     public void checkForEntities(IGregTechTileEntity aBaseMetaTileEntity, long aTime) {
 
@@ -246,8 +248,7 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
         AutoMap<EntityLivingBase> aEntities = getEntities(mFrontBlockPosCache, aBaseMetaTileEntity.getWorld());
         if (!aEntities.isEmpty()) {
             for (EntityLivingBase aFoundEntity : aEntities) {
-                if (aFoundEntity instanceof EntityPlayer) {
-                    EntityPlayer aPlayer = (EntityPlayer) aFoundEntity;
+                if (aFoundEntity instanceof EntityPlayer aPlayer) {
                     if (PlayerUtils.isCreative(aPlayer) || !PlayerUtils.canTakeDamage(aPlayer)) {
                         continue;
                     } else {
@@ -278,9 +279,9 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
         return Math.max(reducedDamage, 0);
     }
 
-    private static final AutoMap<EntityLivingBase> getEntities(AutoMap<BlockPos> aPositionsToCheck, World aWorld) {
-        AutoMap<EntityLivingBase> aEntities = new AutoMap<EntityLivingBase>();
-        HashSet<Chunk> aChunksToCheck = new HashSet<Chunk>();
+    private static AutoMap<EntityLivingBase> getEntities(AutoMap<BlockPos> aPositionsToCheck, World aWorld) {
+        AutoMap<EntityLivingBase> aEntities = new AutoMap<>();
+        HashSet<Chunk> aChunksToCheck = new HashSet<>();
         if (!aPositionsToCheck.isEmpty()) {
             Chunk aLocalChunk;
             for (BlockPos aPos : aPositionsToCheck) {
@@ -289,14 +290,13 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
             }
         }
         if (!aChunksToCheck.isEmpty()) {
-            AutoMap<EntityLivingBase> aEntitiesFound = new AutoMap<EntityLivingBase>();
+            AutoMap<EntityLivingBase> aEntitiesFound = new AutoMap<>();
             for (Chunk aChunk : aChunksToCheck) {
                 if (aChunk.isChunkLoaded) {
                     List[] aEntityLists = aChunk.entityLists;
                     for (List aEntitySubList : aEntityLists) {
                         for (Object aEntity : aEntitySubList) {
-                            if (aEntity instanceof EntityLivingBase) {
-                                EntityLivingBase aPlayer = (EntityLivingBase) aEntity;
+                            if (aEntity instanceof EntityLivingBase aPlayer) {
                                 aEntitiesFound.add(aPlayer);
                             }
                         }
@@ -320,7 +320,7 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
     private static void generateParticles(EntityLivingBase aEntity) {
         BlockPos aPlayerPosBottom = EntityUtils.findBlockPosOfEntity(aEntity);
         BlockPos aPlayerPosTop = aPlayerPosBottom.getUp();
-        AutoMap<BlockPos> aEntityPositions = new AutoMap<BlockPos>();
+        AutoMap<BlockPos> aEntityPositions = new AutoMap<>();
         aEntityPositions.add(aPlayerPosBottom);
         aEntityPositions.add(aPlayerPosTop);
         for (int i = 0; i < 64; i++) {
@@ -430,11 +430,8 @@ public class GregtechMetaTileEntity_IsaMill extends GregtechMeta_MultiBlockBase<
     @Override
     public ArrayList<ItemStack> getStoredInputs() {
         ArrayList<ItemStack> tItems = super.getStoredInputs();
-        for (GT_MetaTileEntity_Hatch_MillingBalls tHatch : mMillingBallBuses) {
-            tHatch.mRecipeMap = getRecipeMap();
-            if (isValidMetaTileEntity(tHatch)) {
-                tItems.addAll(tHatch.getContentUsageSlots());
-            }
+        for (GT_MetaTileEntity_Hatch_MillingBalls tHatch : filterValidMTEs(mMillingBallBuses)) {
+            tItems.addAll(tHatch.getContentUsageSlots());
         }
         return tItems;
     }

@@ -1,7 +1,7 @@
 package gtPlusPlus.xmod.forestry.bees.items.output;
 
 import static gregtech.api.enums.Mods.GTPlusPlus;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sExtractorRecipes;
+import static gregtech.api.recipe.RecipeMaps.extractorRecipes;
 import static gregtech.api.util.GT_RecipeBuilder.TICKS;
 
 import java.util.List;
@@ -96,8 +96,8 @@ public class GTPP_Propolis extends Item {
         if (aOutput == null) {
             return false;
         }
-        GT_Values.RA.stdBuilder().itemInputs(tDrop).itemOutputs(aOutput).outputChances(aChance).noFluidInputs()
-                .noFluidOutputs().duration(aDuration * TICKS).eut(aEUt).addTo(sExtractorRecipes);
+        GT_Values.RA.stdBuilder().itemInputs(tDrop).itemOutputs(aOutput).outputChances(aChance)
+                .duration(aDuration * TICKS).eut(aEUt).addTo(extractorRecipes);
         return true;
     }
 }

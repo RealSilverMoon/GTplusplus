@@ -1,7 +1,7 @@
 package gtPlusPlus.xmod.forestry.bees.custom;
 
 import static gregtech.api.enums.Mods.Forestry;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sFluidExtractionRecipes;
+import static gregtech.api.recipe.RecipeMaps.fluidExtractionRecipes;
 import static gregtech.api.util.GT_RecipeBuilder.SECONDS;
 import static gregtech.api.util.GT_RecipeBuilder.TICKS;
 
@@ -91,8 +91,8 @@ public class GTPP_Bees {
     }
 
     private void addExtractorRecipe(ItemStack input, FluidStack output) {
-        GT_Values.RA.stdBuilder().itemInputs(input).noItemOutputs().noFluidInputs().fluidOutputs(output)
-                .duration(1 * SECONDS + 10 * TICKS).eut(8).addTo(sFluidExtractionRecipes);
+        GT_Values.RA.stdBuilder().itemInputs(input).fluidOutputs(output).duration(1 * SECONDS + 10 * TICKS).eut(8)
+                .addTo(fluidExtractionRecipes);
     }
 
     private static boolean tryGetBeesBoolean() {

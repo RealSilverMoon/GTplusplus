@@ -50,6 +50,7 @@ import com.gtnewhorizon.structurelib.structure.StructureUtility;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.GT_Values;
+import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.TAE;
 import gregtech.api.enums.Textures;
@@ -62,15 +63,16 @@ import gregtech.api.metatileentity.implementations.GT_MetaTileEntity_ExtendedPow
 import gregtech.api.metatileentity.implementations.GT_MetaTileEntity_Hatch;
 import gregtech.api.metatileentity.implementations.GT_MetaTileEntity_Hatch_Input;
 import gregtech.api.objects.ItemData;
+import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTPP_Recipe;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
 import gregtech.api.util.GT_ParallelHelper;
 import gregtech.api.util.GT_Recipe;
 import gregtech.api.util.GT_Utility;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.core.material.ELEMENT;
 import gtPlusPlus.core.util.minecraft.ItemUtils;
@@ -163,13 +165,13 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                             { "               ", "               ", "               ", "               ",
                                     "               ", "               ", "               ", "               ",
                                     "               ", "               ", "               ", "     BAAAB     ",
-                                    "   AA     AA   ", " AA         AA ", "BAA          AB", "B             B",
+                                    "   AA     AA   ", " AA         AA ", "BAA         AAB", "B             B",
                                     "A             A", "A             A", "A             A", "A             A",
                                     "A             A" },
                             { "               ", "               ", "               ", "               ",
                                     "               ", "               ", "               ", "               ",
                                     "               ", "               ", "               ", "      BAB      ",
-                                    "    AA   AA    ", "  AA       AA  ", " BA         AB ", " B           B ",
+                                    "    AA   AA    ", "  AA       AA  ", " BAA       AAB ", " B           B ",
                                     " A           A ", " A           A ", "               ", "               ",
                                     "               " },
                             { "               ", "               ", "               ", "               ",
@@ -262,6 +264,9 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                 .addInfo("If separate input busses are enabled put the circuit in the circuit slot of the bus")
                 .addInfo("Uses FocusTier*4*sqrt(parallels) Neptunium Plasma if focusing")
                 .addInfo("Can use FocusTier*4*sqrt(parallels) Fermium Plasma for additional chance output")
+                .addInfo("Use a screwdriver to enable Fluid mode")
+                .addInfo(
+                        "Fluid mode turns all possible outputs into their fluid variant, those which can't are left as they were.")
                 .addInfo("This multi gets improved when all casings of some types are upgraded")
                 .addInfo("Casing functions:")
                 .addInfo("Pulse Manipulators: Recipe Tier Allowed (check NEI for the tier of each recipe)")
@@ -434,8 +439,8 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
     }
 
     @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeMap() {
-        return GTPP_Recipe.GTPP_Recipe_Map.sQuantumForceTransformerRecipes;
+    public RecipeMap<?> getRecipeMap() {
+        return GTPPRecipeMaps.quantumForceTransformerRecipes;
     }
 
     @Override
@@ -476,7 +481,6 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
 
                 doFermium = false;
                 doNeptunium = false;
-                final ItemStack controllerStack = getControllerSlot();
 
                 if (recipe.mSpecialValue <= getFocusingTier()) {
                     if (mFermiumHatch != null && mFermiumHatch.getFluid() != null
@@ -491,9 +495,7 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                     }
                 }
 
-                chances = GetChanceOutputs(
-                        recipe,
-                        doNeptunium && controllerStack != null ? controllerStack.getItemDamage() - 1 : -1);
+                chances = getOutputChances(recipe, doNeptunium ? findProgrammedCircuitNumber() : -1);
 
                 return CheckRecipeResultRegistry.SUCCESSFUL;
             }
@@ -603,6 +605,20 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                     return fluids.toArray(new FluidStack[0]);
                 });
             }
+
+            private int findProgrammedCircuitNumber() {
+                if (isInputSeparationEnabled()) {
+                    for (ItemStack stack : inputItems) {
+                        if (ItemList.Circuit_Integrated.isStackEqual(stack)) {
+                            return stack.getItemDamage() - 1;
+                        }
+                    }
+                    return -1;
+                } else {
+                    final ItemStack controllerStack = getControllerSlot();
+                    return controllerStack != null ? controllerStack.getItemDamage() - 1 : -1;
+                }
+            }
         };
     }
 
@@ -669,7 +685,7 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
         return false;
     }
 
-    private int[] GetChanceOutputs(GT_Recipe tRecipe, int aChanceIncreased) {
+    private int[] getOutputChances(GT_Recipe tRecipe, int aChanceIncreased) {
         int difference = getFocusingTier() - tRecipe.mSpecialValue;
         int aOutputsAmount = tRecipe.mOutputs.length + tRecipe.mFluidOutputs.length;
         int aChancePerOutput = 10000 / aOutputsAmount;
@@ -681,7 +697,7 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                 for (int i = 0; i < tChances.length; i++) {
                     if (doNeptunium) {
                         if (i == aChanceIncreased) {
-                            tChances[i] = aChancePerOutput / 2 * (aOutputsAmount - 1);
+                            tChances[i] += aChancePerOutput / 2 * (aOutputsAmount - 1);
                         } else {
                             tChances[i] /= 2;
                         }
@@ -696,7 +712,7 @@ public class GregtechMetaTileEntity_QuantumForceTransformer
                 for (int i = 0; i < tChances.length; i++) {
                     if (doNeptunium) {
                         if (i == aChanceIncreased) {
-                            tChances[i] = aChancePerOutput * 3 / 4 * (aOutputsAmount - 1);
+                            tChances[i] += aChancePerOutput * 3 / 4 * (aOutputsAmount - 1);
                         } else {
                             tChances[i] /= 4;
                         }

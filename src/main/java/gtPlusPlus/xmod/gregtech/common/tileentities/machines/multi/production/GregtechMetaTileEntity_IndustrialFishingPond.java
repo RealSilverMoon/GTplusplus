@@ -35,17 +35,18 @@ import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.util.FishPondFakeRecipe;
-import gregtech.api.util.GTPP_Recipe;
 import gregtech.api.util.GT_Multiblock_Tooltip_Builder;
 import gregtech.api.util.GT_OverclockCalculator;
 import gregtech.api.util.GT_ParallelHelper;
 import gregtech.api.util.GT_Recipe;
 import gregtech.api.util.GT_Utility;
 import gtPlusPlus.api.objects.data.AutoMap;
+import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.core.lib.CORE;
 import gtPlusPlus.core.recipe.common.CI;
@@ -168,8 +169,13 @@ public class GregtechMetaTileEntity_IndustrialFishingPond extends
     }
 
     @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeMap() {
-        return null;
+    public RecipeMap<?> getRecipeMap() {
+        return GTPPRecipeMaps.fishPondRecipes;
+    }
+
+    @Override
+    protected boolean filtersFluid() {
+        return false;
     }
 
     @Override
@@ -188,59 +194,56 @@ public class GregtechMetaTileEntity_IndustrialFishingPond extends
         if (!hasGenerateRecipes) {
             generateRecipes();
         }
-        if (hasGenerateRecipes) {
-            if (!checkForWater()) {
-                return SimpleCheckRecipeResult.ofFailure("no_water");
-            }
-            ItemStack[] tItemInputs = getStoredInputs().toArray(new ItemStack[0]);
-            FluidStack[] tFluidInputs = getStoredFluids().toArray(new FluidStack[0]);
-
-            if (!isUsingControllerCircuit && tItemInputs.length == 0) {
-                return CheckRecipeResultRegistry.NO_RECIPE;
-            }
-
-            long tEnergy = getMaxInputEnergy();
-
-            getCircuit(tItemInputs);
-
-            ItemStack[] mFishOutput = generateLoot(this.mMode);
-            mFishOutput = removeNulls(mFishOutput);
-            GT_Recipe g = new GTPP_Recipe(
-                    true,
-                    new ItemStack[] {},
-                    mFishOutput,
-                    null,
-                    new int[] {},
-                    tFluidInputs,
-                    mOutputFluids,
-                    200,
-                    16,
-                    0);
-            GT_OverclockCalculator calculator = new GT_OverclockCalculator().setRecipeEUt(g.mEUt).setEUt(tEnergy)
-                    .setDuration(g.mDuration);
-            GT_ParallelHelper helper = new GT_ParallelHelper().setRecipe(g).setItemInputs(tItemInputs)
-                    .setFluidInputs(tFluidInputs).setAvailableEUt(tEnergy).setMaxParallel(getMaxParallelRecipes())
-                    .setConsumption(true).setOutputCalculation(true).setMachine(this)
-                    .enableBatchMode(batchMode ? 128 : 1).setCalculator(calculator);
-
-            helper.build();
-
-            if (helper.getCurrentParallel() == 0) {
-                return CheckRecipeResultRegistry.OUTPUT_FULL;
-            }
-
-            this.mEfficiency = (10000 - (getIdealStatus() - getRepairStatus()) * 1000);
-            this.mEfficiencyIncrease = 10000;
-
-            lEUt = -calculator.getConsumption();
-            mMaxProgresstime = (int) Math.ceil(calculator.getDuration() * helper.getDurationMultiplierDouble());
-
-            mOutputItems = helper.getItemOutputs();
-            mOutputFluids = helper.getFluidOutputs();
-            updateSlots();
-
-            return CheckRecipeResultRegistry.SUCCESSFUL;
+        if (!checkForWater()) {
+            return SimpleCheckRecipeResult.ofFailure("no_water");
         }
+        ItemStack[] tItemInputs = getStoredInputs().toArray(new ItemStack[0]);
+        FluidStack[] tFluidInputs = getStoredFluids().toArray(new FluidStack[0]);
+
+        if (!isUsingControllerCircuit && tItemInputs.length == 0) {
+            return CheckRecipeResultRegistry.NO_RECIPE;
+        }
+
+        long tEnergy = getMaxInputEnergy();
+
+        getCircuit(tItemInputs);
+
+        ItemStack[] mFishOutput = generateLoot(this.mMode);
+        mFishOutput = removeNulls(mFishOutput);
+        GT_Recipe g = new GT_Recipe(
+                true,
+                new ItemStack[] {},
+                mFishOutput,
+                null,
+                new int[] {},
+                tFluidInputs,
+                null,
+                200,
+                16,
+                0);
+        GT_OverclockCalculator calculator = new GT_OverclockCalculator().setRecipeEUt(g.mEUt).setEUt(tEnergy)
+                .setDuration(g.mDuration);
+        GT_ParallelHelper helper = new GT_ParallelHelper().setRecipe(g).setItemInputs(tItemInputs)
+                .setFluidInputs(tFluidInputs).setAvailableEUt(tEnergy).setMaxParallel(getMaxParallelRecipes())
+                .setConsumption(true).setOutputCalculation(true).setMachine(this).enableBatchMode(batchMode ? 128 : 1)
+                .setCalculator(calculator);
+
+        helper.build();
+
+        if (helper.getCurrentParallel() == 0) {
+            return CheckRecipeResultRegistry.ITEM_OUTPUT_FULL;
+        }
+
+        this.mEfficiency = (10000 - (getIdealStatus() - getRepairStatus()) * 1000);
+        this.mEfficiencyIncrease = 10000;
+
+        lEUt = -calculator.getConsumption();
+        mMaxProgresstime = (int) Math.ceil(calculator.getDuration() * helper.getDurationMultiplierDouble());
+
+        mOutputItems = helper.getItemOutputs();
+        mOutputFluids = null;
+        updateSlots();
+
         return CheckRecipeResultRegistry.SUCCESSFUL;
     }
 
@@ -342,33 +345,30 @@ public class GregtechMetaTileEntity_IndustrialFishingPond extends
                 || (cofhWater != null && cofhWater.isAssignableFrom(block.getClass()) && meta != 0);
     }
 
-    private static AutoMap<AutoMap<WeightedRandomFishable>> categories = new AutoMap<AutoMap<WeightedRandomFishable>>();
-    private static AutoMap<WeightedRandomFishable> categoryFish = new AutoMap<WeightedRandomFishable>();
-    private static AutoMap<WeightedRandomFishable> categoryJunk = new AutoMap<WeightedRandomFishable>();
-    private static AutoMap<WeightedRandomFishable> categoryLoot = new AutoMap<WeightedRandomFishable>();
+    private static AutoMap<AutoMap<WeightedRandomFishable>> categories = new AutoMap<>();
+    private static AutoMap<WeightedRandomFishable> categoryFish = new AutoMap<>();
+    private static AutoMap<WeightedRandomFishable> categoryJunk = new AutoMap<>();
+    private static AutoMap<WeightedRandomFishable> categoryLoot = new AutoMap<>();
     private static boolean hasGenerateRecipes = false;
     private int mMode = 14;
     private int mMax = 8;
 
-    private boolean generateRecipes() {
-        if (!hasGenerateRecipes) {
-            categories.put(categoryFish);
-            categories.put(categoryJunk);
-            categories.put(categoryLoot);
-            for (WeightedRandomFishable h : FishPondFakeRecipe.fish) {
-                categoryFish.put(h);
-            }
-            for (WeightedRandomFishable h : FishPondFakeRecipe.junk) {
-                categoryJunk.put(h);
-            }
-            for (WeightedRandomFishable h : FishPondFakeRecipe.treasure) {
-                categoryLoot.put(h);
-            }
-            hasGenerateRecipes = true;
-            return true;
-        } else {
-            return true;
+    private void generateRecipes() {
+        if (hasGenerateRecipes) return;
+
+        categories.put(categoryFish);
+        categories.put(categoryJunk);
+        categories.put(categoryLoot);
+        for (WeightedRandomFishable h : FishPondFakeRecipe.fish) {
+            categoryFish.put(h);
         }
+        for (WeightedRandomFishable h : FishPondFakeRecipe.junk) {
+            categoryJunk.put(h);
+        }
+        for (WeightedRandomFishable h : FishPondFakeRecipe.treasure) {
+            categoryLoot.put(h);
+        }
+        hasGenerateRecipes = true;
     }
 
     private int getCircuit(ItemStack[] t) {
@@ -408,7 +408,7 @@ public class GregtechMetaTileEntity_IndustrialFishingPond extends
     }
 
     // reflection map
-    private static Map<WeightedRandomFishable, ItemStack> reflectiveFishMap = new HashMap<WeightedRandomFishable, ItemStack>();
+    private static Map<WeightedRandomFishable, ItemStack> reflectiveFishMap = new HashMap<>();
 
     private ItemStack reflectiveFish(WeightedRandomFishable y) {
         if (reflectiveFishMap.containsKey(y)) {

@@ -1,7 +1,7 @@
 package gtPlusPlus.xmod.gregtech.loaders.recipe;
 
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sCentrifugeRecipes;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sFusionRecipes;
+import static gregtech.api.recipe.RecipeMaps.centrifugeRecipes;
+import static gregtech.api.recipe.RecipeMaps.fusionRecipes;
 import static gregtech.api.util.GT_RecipeBuilder.MINUTES;
 import static gregtech.api.util.GT_RecipeBuilder.SECONDS;
 import static gregtech.api.util.GT_RecipeBuilder.TICKS;
@@ -95,47 +95,56 @@ public class RecipeLoader_Nuclear {
         // Process Used Fuel Rods for Krypton
 
         // Uranium
-        GT_Values.RA.stdBuilder()
-                .itemInputs(
-                        ItemUtils.getItemStackFromFQRN("IC2:reactorUraniumSimpledepleted", 8),
-                        GT_Utility.getIntegratedCircuit(20))
-                .itemOutputs(
-                        ItemList.IC2_Fuel_Rod_Empty.get(8),
-                        GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Uranium, 2L),
-                        ELEMENT.getInstance().URANIUM232.getSmallDust(1),
-                        ELEMENT.getInstance().URANIUM233.getSmallDust(1),
-                        GT_OreDictUnificator.get(OrePrefixes.dustSmall, Materials.Uranium235, 1L),
-                        GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L))
-                .outputChances(10000, 10000, 1000, 1000, 1000, 500).noFluidInputs()
-                .fluidOutputs(FluidUtils.getFluidStack("krypton", 60)).duration(4 * MINUTES + 10 * SECONDS)
-                .eut(TierEU.RECIPE_IV).addTo(sCentrifugeRecipes);
+        for (ItemStack depletedRod : new ItemStack[] {
+                ItemUtils.getItemStackFromFQRN("IC2:reactorUraniumSimpledepleted", 8),
+                ItemUtils.getItemStackFromFQRN("IC2:reactorUraniumDualdepleted", 4),
+                ItemUtils.getItemStackFromFQRN("IC2:reactorUraniumQuaddepleted", 2) }) {
+            GT_Values.RA.stdBuilder().itemInputs(depletedRod, GT_Utility.getIntegratedCircuit(20))
+                    .itemOutputs(
+                            ItemList.IC2_Fuel_Rod_Empty.get(8),
+                            GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Uranium, 2L),
+                            ELEMENT.getInstance().URANIUM232.getSmallDust(1),
+                            ELEMENT.getInstance().URANIUM233.getSmallDust(1),
+                            GT_OreDictUnificator.get(OrePrefixes.dustSmall, Materials.Uranium235, 1L),
+                            GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L))
+                    .outputChances(10000, 10000, 1000, 1000, 1000, 500)
+                    .fluidOutputs(FluidUtils.getFluidStack("krypton", 60)).duration(4 * MINUTES + 10 * SECONDS)
+                    .eut(TierEU.RECIPE_IV).addTo(centrifugeRecipes);
+        }
+
         // Mox
-        GT_Values.RA.stdBuilder()
-                .itemInputs(
-                        ItemUtils.getItemStackFromFQRN("IC2:reactorMOXSimpledepleted", 8),
-                        GT_Utility.getIntegratedCircuit(20))
-                .itemOutputs(
-                        ItemList.IC2_Fuel_Rod_Empty.get(8),
-                        GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Plutonium, 2L),
-                        GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium241, 1L),
-                        GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L),
-                        ELEMENT.getInstance().PLUTONIUM238.getTinyDust(1),
-                        GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L))
-                .outputChances(10000, 10000, 500, 500, 500, 500).noFluidInputs()
-                .fluidOutputs(FluidUtils.getFluidStack("krypton", 90)).duration(6 * MINUTES + 15 * SECONDS)
-                .eut(TierEU.RECIPE_IV).addTo(sCentrifugeRecipes);
+        for (ItemStack depletedRod : new ItemStack[] {
+                ItemUtils.getItemStackFromFQRN("IC2:reactorMOXSimpledepleted", 8),
+                ItemUtils.getItemStackFromFQRN("IC2:reactorMOXDualdepleted", 4),
+                ItemUtils.getItemStackFromFQRN("IC2:reactorMOXQuaddepleted", 2) }) {
+            GT_Values.RA.stdBuilder().itemInputs(depletedRod, GT_Utility.getIntegratedCircuit(20))
+                    .itemOutputs(
+                            ItemList.IC2_Fuel_Rod_Empty.get(8),
+                            GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Plutonium, 2L),
+                            GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium241, 1L),
+                            GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L),
+                            ELEMENT.getInstance().PLUTONIUM238.getTinyDust(1),
+                            GT_OreDictUnificator.get(OrePrefixes.dustTiny, Materials.Plutonium, 1L))
+                    .outputChances(10000, 10000, 500, 500, 500, 500)
+                    .fluidOutputs(FluidUtils.getFluidStack("krypton", 90)).duration(6 * MINUTES + 15 * SECONDS)
+                    .eut(TierEU.RECIPE_IV).addTo(centrifugeRecipes);
+        }
+
         // Thorium
-        GT_Values.RA.stdBuilder().itemInputs(ItemList.Depleted_Thorium_1.get(8), GT_Utility.getIntegratedCircuit(20))
-                .itemOutputs(
-                        ItemList.IC2_Fuel_Rod_Empty.get(8),
-                        GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Thorium, 2L),
-                        ELEMENT.getInstance().THORIUM232.getDust(1),
-                        GT_OreDictUnificator.get(OrePrefixes.dustSmall, Materials.Lutetium, 1L),
-                        ELEMENT.getInstance().POLONIUM.getSmallDust(1),
-                        ELEMENT.getInstance().THALLIUM.getTinyDust(1))
-                .outputChances(10000, 10000, 5000, 5000, 5000, 2500).noFluidInputs()
-                .fluidOutputs(FluidUtils.getFluidStack("krypton", 30)).duration(2 * MINUTES + 5 * SECONDS)
-                .eut(TierEU.RECIPE_IV).addTo(sCentrifugeRecipes);
+        for (ItemStack depletedRod : new ItemStack[] { ItemList.Depleted_Thorium_1.get(8),
+                ItemList.Depleted_Thorium_2.get(4), ItemList.Depleted_Thorium_4.get(2) }) {
+            GT_Values.RA.stdBuilder().itemInputs(depletedRod, GT_Utility.getIntegratedCircuit(20))
+                    .itemOutputs(
+                            ItemList.IC2_Fuel_Rod_Empty.get(8),
+                            GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Thorium, 2L),
+                            ELEMENT.getInstance().THORIUM232.getDust(1),
+                            GT_OreDictUnificator.get(OrePrefixes.dustSmall, Materials.Lutetium, 1L),
+                            ELEMENT.getInstance().POLONIUM.getSmallDust(1),
+                            ELEMENT.getInstance().THALLIUM.getTinyDust(1))
+                    .outputChances(10000, 10000, 5000, 5000, 5000, 2500)
+                    .fluidOutputs(FluidUtils.getFluidStack("krypton", 30)).duration(2 * MINUTES + 5 * SECONDS)
+                    .eut(TierEU.RECIPE_IV).addTo(centrifugeRecipes);
+        }
     }
 
     private static void chemicalBathRecipes() {
@@ -260,15 +269,6 @@ public class RecipeLoader_Nuclear {
                 GT_Values.NI,
                 20 * 20,
                 30);
-
-        // Technetium
-        GT_Values.RA.addChemicalRecipe(
-                CI.getNumberedAdvancedCircuit(22),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustTechnetium99", 1),
-                FluidUtils.getFluidStack("sulfuricacid", 1000),
-                FluidUtils.getFluidStack("sulfuricacid", 144 * 2),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustTechnetium", 1),
-                100 * 20);
 
         // Sodium Hydroxide
         GT_Values.RA.addChemicalRecipe(
@@ -482,11 +482,10 @@ public class RecipeLoader_Nuclear {
 
     private static void fusionChainRecipes() {
         // Mk1
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
-                .fluidInputs(Materials.Boron.getPlasma(144), Materials.Calcium.getPlasma(16))
+        GT_Values.RA.stdBuilder().fluidInputs(Materials.Boron.getPlasma(144), Materials.Calcium.getPlasma(16))
                 .fluidOutputs(new FluidStack(ELEMENT.getInstance().NEON.getPlasma(), 1000))
                 .duration(3 * SECONDS + 4 * TICKS).eut(TierEU.RECIPE_LuV).metadata(FUSION_THRESHOLD, 100000000)
-                .addTo(sFusionRecipes);
+                .addTo(fusionRecipes);
 
         GT_Values.RA.stdBuilder()
                 .fluidInputs(
@@ -494,47 +493,46 @@ public class RecipeLoader_Nuclear {
                         Materials.Bedrockium.getMolten(144))
                 .fluidOutputs(new FluidStack(ELEMENT.STANDALONE.FORCE.getPlasma(), 1000))
                 .duration(3 * SECONDS + 4 * TICKS).eut(TierEU.RECIPE_LuV).metadata(FUSION_THRESHOLD, 100000000)
-                .addTo(sFusionRecipes);
+                .addTo(fusionRecipes);
 
         // Mk2
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
-                .fluidInputs(Materials.Niobium.getPlasma(144), Materials.Zinc.getPlasma(144))
+        GT_Values.RA.stdBuilder().fluidInputs(Materials.Niobium.getPlasma(144), Materials.Zinc.getPlasma(144))
                 .fluidOutputs(new FluidStack(ELEMENT.getInstance().KRYPTON.getPlasma(), 144)).duration(32 * TICKS)
-                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(sFusionRecipes);
+                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(fusionRecipes);
 
         GT_Values.RA.stdBuilder()
                 .fluidInputs(
                         new FluidStack(ELEMENT.getInstance().KRYPTON.getPlasma(), 144),
                         new FluidStack(ELEMENT.STANDALONE.FORCE.getPlasma(), 1000))
                 .fluidOutputs(new FluidStack(ELEMENT.STANDALONE.ASTRAL_TITANIUM.getPlasma(), 1000)).duration(32 * TICKS)
-                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(sFusionRecipes);
+                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(fusionRecipes);
 
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
+        GT_Values.RA.stdBuilder()
                 .fluidInputs(
                         new FluidStack(ELEMENT.STANDALONE.ASTRAL_TITANIUM.getPlasma(), 144),
                         new FluidStack(ALLOY.TITANSTEEL.getFluid(), 8))
                 .fluidOutputs(new FluidStack(ELEMENT.STANDALONE.RUNITE.getPlasma(), 1000)).duration(32 * TICKS)
-                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(sFusionRecipes);
+                .eut(TierEU.RECIPE_ZPM).metadata(FUSION_THRESHOLD, 300000000).addTo(fusionRecipes);
 
         // Mk3
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
+        GT_Values.RA.stdBuilder()
                 .fluidInputs(ELEMENT.getInstance().CURIUM.getFluidStack(144), Materials.Americium.getPlasma(144))
                 .fluidOutputs(new FluidStack(ELEMENT.getInstance().XENON.getPlasma(), 144)).duration(16 * TICKS)
-                .eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(sFusionRecipes);
+                .eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(fusionRecipes);
 
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
+        GT_Values.RA.stdBuilder()
                 .fluidInputs(
                         new FluidStack(ELEMENT.getInstance().XENON.getPlasma(), 144),
                         new FluidStack(ELEMENT.STANDALONE.RUNITE.getPlasma(), 1000))
                 .fluidOutputs(new FluidStack(ELEMENT.STANDALONE.ADVANCED_NITINOL.getPlasma(), 1000))
-                .duration(16 * TICKS).eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(sFusionRecipes);
+                .duration(16 * TICKS).eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(fusionRecipes);
 
-        GT_Values.RA.stdBuilder().noItemInputs().noItemOutputs()
+        GT_Values.RA.stdBuilder()
                 .fluidInputs(
                         new FluidStack(ELEMENT.STANDALONE.ADVANCED_NITINOL.getPlasma(), 144),
                         Materials.Tartarite.getMolten(2))
                 .fluidOutputs(new FluidStack(ELEMENT.STANDALONE.CELESTIAL_TUNGSTEN.getPlasma(), 1000))
-                .duration(16 * TICKS).eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(sFusionRecipes);
+                .duration(16 * TICKS).eut(TierEU.RECIPE_UV).metadata(FUSION_THRESHOLD, 500000000).addTo(fusionRecipes);
     }
 
     private static void macerator() {

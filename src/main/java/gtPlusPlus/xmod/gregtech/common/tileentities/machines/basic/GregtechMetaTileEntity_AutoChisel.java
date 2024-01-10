@@ -7,12 +7,9 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.gtnewhorizons.modularui.api.drawable.FallbackableUITexture;
 import com.gtnewhorizons.modularui.api.drawable.IDrawable;
 import com.gtnewhorizons.modularui.api.math.Pos2d;
-import com.gtnewhorizons.modularui.api.math.Size;
-import com.gtnewhorizons.modularui.api.screen.ModularWindow;
-import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.ProgressBar;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 
 import gregtech.api.enums.Textures.BlockIcons;
@@ -22,7 +19,7 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.GT_MetaTileEntity_BasicMachine;
 import gregtech.api.objects.GT_RenderedTexture;
-import gregtech.api.util.GT_Recipe;
+import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.util.GT_Utility;
 import gtPlusPlus.core.util.minecraft.ItemUtils;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
@@ -43,8 +40,6 @@ public class GregtechMetaTileEntity_AutoChisel extends GT_MetaTileEntity_BasicMa
                 "Chisels things, Gregtech style",
                 1,
                 1,
-                "Compressor.png",
-                "",
                 new ITexture[] { new GT_RenderedTexture(BlockIcons.OVERLAY_SIDE_MASSFAB_ACTIVE),
                         new GT_RenderedTexture(BlockIcons.OVERLAY_SIDE_MASSFAB),
                         new GT_RenderedTexture(BlockIcons.OVERLAY_FRONT_MULTI_SMELTER_ACTIVE),
@@ -55,20 +50,13 @@ public class GregtechMetaTileEntity_AutoChisel extends GT_MetaTileEntity_BasicMa
                         new GT_RenderedTexture(BlockIcons.OVERLAY_BOTTOM_MASSFAB) });
     }
 
-    public GregtechMetaTileEntity_AutoChisel(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures,
-            String aGUIName, String aNEIName) {
-        super(aName, aTier, 1, aDescription, aTextures, 1, 1, aGUIName, aNEIName);
+    public GregtechMetaTileEntity_AutoChisel(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
+        super(aName, aTier, 1, aDescription, aTextures, 1, 1);
     }
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new GregtechMetaTileEntity_AutoChisel(
-                this.mName,
-                this.mTier,
-                this.mDescriptionArray,
-                this.mTextures,
-                this.mGUIName,
-                this.mNEIName);
+        return new GregtechMetaTileEntity_AutoChisel(this.mName, this.mTier, this.mDescriptionArray, this.mTextures);
     }
 
     @Override
@@ -78,11 +66,6 @@ public class GregtechMetaTileEntity_AutoChisel extends GT_MetaTileEntity_BasicMa
                 "What you want to chisel goes in slot 1",
                 "What you want to get goes in the special slot (bottom right)",
                 "If special slot is empty, first chisel result is used");
-    }
-
-    @Override
-    public GT_Recipe.GT_Recipe_Map getRecipeList() {
-        return null;
     }
 
     private boolean hasValidCache(ItemStack aStack, ItemStack aSpecialSlot, boolean aClearOnFailure) {
@@ -183,16 +166,12 @@ public class GregtechMetaTileEntity_AutoChisel extends GT_MetaTileEntity_BasicMa
         return true;
     }
 
+    private static final FallbackableUITexture progressBarTexture = GT_UITextures
+            .fallbackableProgressbar("auto_chisel", GT_UITextures.PROGRESSBAR_COMPRESS);
+
     @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        super.addUIWidgets(builder, buildContext);
-        builder.widget(
-                createProgressBar(
-                        GT_UITextures.PROGRESSBAR_COMPRESS,
-                        20,
-                        ProgressBar.Direction.RIGHT,
-                        new Pos2d(78, 24),
-                        new Size(20, 18)));
+    protected BasicUIProperties getUIProperties() {
+        return super.getUIProperties().toBuilder().progressBarTexture(progressBarTexture).build();
     }
 
     @Override
@@ -202,8 +181,8 @@ public class GregtechMetaTileEntity_AutoChisel extends GT_MetaTileEntity_BasicMa
     }
 
     @Override
-    protected SlotWidget createSpecialSlot(IDrawable[] backgrounds, Pos2d pos) {
-        return (SlotWidget) super.createSpecialSlot(backgrounds, pos)
+    protected SlotWidget createSpecialSlot(IDrawable[] backgrounds, Pos2d pos, BasicUIProperties uiProperties) {
+        return (SlotWidget) super.createSpecialSlot(backgrounds, pos, uiProperties)
                 .setGTTooltip(() -> mTooltipCache.getData("GTPP.machines.chisel_slot.tooltip"));
     }
 }

@@ -3,9 +3,9 @@ package gtPlusPlus.core.item.chemistry;
 import static gregtech.api.enums.Mods.BiomesOPlenty;
 import static gregtech.api.enums.Mods.Forestry;
 import static gregtech.api.enums.Mods.TinkerConstruct;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sCentrifugeRecipes;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sCompressorRecipes;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sMixerRecipes;
+import static gregtech.api.recipe.RecipeMaps.centrifugeRecipes;
+import static gregtech.api.recipe.RecipeMaps.compressorRecipes;
+import static gregtech.api.recipe.RecipeMaps.mixerRecipes;
 import static gregtech.api.util.GT_RecipeBuilder.SECONDS;
 import static gregtech.api.util.GT_RecipeConstants.UniversalChemical;
 
@@ -46,7 +46,7 @@ public class AgriculturalChem extends ItemPackage {
     private static boolean aBOP;
     private static boolean aTiCon;
 
-    private static AutoMap<FluidStack> mBloodFluids = new AutoMap<FluidStack>();
+    private static AutoMap<FluidStack> mBloodFluids = new AutoMap<>();
 
     /**
      * Fluids
@@ -336,20 +336,20 @@ public class AgriculturalChem extends ItemPackage {
         }
     }
 
-    private static final AutoMap<ItemStack> mMeats = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mFish = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mFruits = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mVege = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mNuts = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mSeeds = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mPeat = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mBones = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mBoneMeal = new AutoMap<ItemStack>();
+    private static final AutoMap<ItemStack> mMeats = new AutoMap<>();
+    private static final AutoMap<ItemStack> mFish = new AutoMap<>();
+    private static final AutoMap<ItemStack> mFruits = new AutoMap<>();
+    private static final AutoMap<ItemStack> mVege = new AutoMap<>();
+    private static final AutoMap<ItemStack> mNuts = new AutoMap<>();
+    private static final AutoMap<ItemStack> mSeeds = new AutoMap<>();
+    private static final AutoMap<ItemStack> mPeat = new AutoMap<>();
+    private static final AutoMap<ItemStack> mBones = new AutoMap<>();
+    private static final AutoMap<ItemStack> mBoneMeal = new AutoMap<>();
 
-    private static final AutoMap<ItemStack> mList_Master_Meats = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mList_Master_FruitVege = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mList_Master_Seeds = new AutoMap<ItemStack>();
-    private static final AutoMap<ItemStack> mList_Master_Bones = new AutoMap<ItemStack>();
+    private static final AutoMap<ItemStack> mList_Master_Meats = new AutoMap<>();
+    private static final AutoMap<ItemStack> mList_Master_FruitVege = new AutoMap<>();
+    private static final AutoMap<ItemStack> mList_Master_Seeds = new AutoMap<>();
+    private static final AutoMap<ItemStack> mList_Master_Bones = new AutoMap<>();
 
     private static void processAllOreDict() {
         processOreDict("listAllmeatraw", mMeats);
@@ -424,14 +424,14 @@ public class AgriculturalChem extends ItemPackage {
                 .itemOutputs(aDirtDust, aDirtDust, aManureByprod1, aManureByprod1, aManureByprod1, aManureByprod1)
                 .outputChances(2000, 2000, 500, 500, 250, 250).fluidInputs(FluidUtils.getFluidStack(PoopJuice, 1000))
                 .fluidOutputs(FluidUtils.getFluidStack(ManureSlurry, 250)).duration(10 * SECONDS).eut(TierEU.RECIPE_LV)
-                .addTo(sCentrifugeRecipes);
+                .addTo(centrifugeRecipes);
 
         // More Efficient way to get byproducts, less Slurry
         GT_Values.RA.stdBuilder().itemInputs(GT_Utility.getIntegratedCircuit(20))
                 .itemOutputs(aDirtDust, aDirtDust, aManureByprod1, aManureByprod1, aManureByprod2, aManureByprod2)
                 .outputChances(4000, 3000, 1250, 1250, 675, 675).fluidInputs(FluidUtils.getFluidStack(PoopJuice, 1000))
                 .fluidOutputs(FluidUtils.getFluidStack(ManureSlurry, 50)).duration(20 * SECONDS)
-                .eut(TierEU.RECIPE_MV / 2).addTo(sCentrifugeRecipes);
+                .eut(TierEU.RECIPE_MV / 2).addTo(centrifugeRecipes);
     }
 
     private static void addAdvancedSlurryRecipes() {
@@ -451,7 +451,7 @@ public class AgriculturalChem extends ItemPackage {
                     // Poop Juice to Fertile Slurry
                     GT_Values.RA.stdBuilder().itemInputs(aCircuit, aBone, aMeat, aInputCells).itemOutputs(aEmptyCells)
                             .fluidInputs(aBloodStack).fluidOutputs(aOutput).duration(8 * SECONDS)
-                            .eut(TierEU.RECIPE_MV / 2).addTo(sMixerRecipes);
+                            .eut(TierEU.RECIPE_MV / 2).addTo(mixerRecipes);
                 }
             }
         }
@@ -467,13 +467,13 @@ public class AgriculturalChem extends ItemPackage {
             for (ItemStack aMeatStack : mList_Master_Meats) {
                 aMeat = ItemUtils.getSimpleStack(aMeatStack, 5);
                 GT_Values.RA.stdBuilder().itemInputs(aPeat, aMeat).itemOutputs(aOutputDust).fluidInputs(aInputFluid)
-                        .noFluidOutputs().duration(20 * SECONDS).eut(TierEU.RECIPE_MV).addTo(UniversalChemical);
+                        .duration(20 * SECONDS).eut(TierEU.RECIPE_MV).addTo(UniversalChemical);
             }
             aPeat = ItemUtils.getSimpleStack(aPeatStack, 2);
             for (ItemStack aMeatStack : mList_Master_FruitVege) {
                 aMeat = ItemUtils.getSimpleStack(aMeatStack, 9);
                 GT_Values.RA.stdBuilder().itemInputs(aPeat, aMeat).itemOutputs(aOutputDust).fluidInputs(aInputFluid)
-                        .noFluidOutputs().duration(10 * SECONDS).eut(TierEU.RECIPE_MV).addTo(UniversalChemical);
+                        .duration(10 * SECONDS).eut(TierEU.RECIPE_MV).addTo(UniversalChemical);
             }
         }
     }
@@ -488,13 +488,13 @@ public class AgriculturalChem extends ItemPackage {
             for (ItemStack aMeatStack : mList_Master_Meats) {
                 aMeat = ItemUtils.getSimpleStack(aMeatStack, 7);
                 GT_Values.RA.stdBuilder().itemInputs(aPeat, aMeat).itemOutputs(aOutputDust).fluidInputs(aInputFluid)
-                        .noFluidOutputs().duration(10 * SECONDS).eut(140).addTo(UniversalChemical);
+                        .duration(10 * SECONDS).eut(140).addTo(UniversalChemical);
             }
             aPeat = ItemUtils.getSimpleStack(aPeatStack, 3);
             for (ItemStack aMeatStack : mList_Master_FruitVege) {
                 aMeat = ItemUtils.getSimpleStack(aMeatStack, 12);
                 GT_Values.RA.stdBuilder().itemInputs(aPeat, aMeat).itemOutputs(aOutputDust).fluidInputs(aInputFluid)
-                        .noFluidOutputs().duration(5 * SECONDS).eut(140).addTo(UniversalChemical);
+                        .duration(5 * SECONDS).eut(140).addTo(UniversalChemical);
             }
         }
     }
@@ -520,9 +520,8 @@ public class AgriculturalChem extends ItemPackage {
                 if (aItemRegInstance != null) {
                     Field aFertField = ReflectionUtils.getField(aItemRegInstance.getClass(), "fertilizerCompound");
                     Object aItemInstance = aFertField.get(aItemRegInstance);
-                    if (aItemInstance instanceof Item) {
+                    if (aItemInstance instanceof Item aForestryFert) {
                         aFertForestry = ItemUtils.getSimpleStack((Item) aItemInstance);
-                        Item aForestryFert = (Item) aItemInstance;
                         CORE.RA.addDehydratorRecipe(
                                 new ItemStack[] { CI.getNumberedCircuit(11),
                                         ItemUtils.getSimpleStack(aDustOrganicFert, 4) },
@@ -556,8 +555,8 @@ public class AgriculturalChem extends ItemPackage {
 
         // Dirt Production
         GT_Values.RA.stdBuilder().itemInputs(ItemUtils.getSimpleStack(dustDirt, 9))
-                .itemOutputs(ItemUtils.getSimpleStack(Blocks.dirt)).noFluidInputs().noFluidOutputs()
-                .duration(2 * SECONDS).eut(8).addTo(sCompressorRecipes);
+                .itemOutputs(ItemUtils.getSimpleStack(Blocks.dirt)).duration(2 * SECONDS).eut(8)
+                .addTo(compressorRecipes);
 
         // Centrifuge Byproducts
 
@@ -573,7 +572,7 @@ public class AgriculturalChem extends ItemPackage {
                         ItemUtils.getItemStackOfAmountFromOreDict("dustTinyAmmoniumNitrate", 1))
                 .outputChances(2500, 2500, 750, 1000, 5000, 250).fluidInputs(Materials.SulfuricAcid.getFluid(250))
                 .fluidOutputs(FluidUtils.getFluidStack("sulfuricapatite", 50)).duration(20 * SECONDS)
-                .eut(TierEU.RECIPE_MV / 2).addTo(sCentrifugeRecipes);
+                .eut(TierEU.RECIPE_MV / 2).addTo(centrifugeRecipes);
 
         // Add Fuel Usages
         CORE.RA.addSemifluidFuel(FluidUtils.getFluidStack(PoopJuice, 1000), 12);
@@ -592,7 +591,7 @@ public class AgriculturalChem extends ItemPackage {
                 .outputChances(3000, 3000, 2000, 2000, 1000, 1000)
                 .fluidInputs(FluidUtils.getFluidStack(AgriculturalChem.RedMud, 1000))
                 .fluidOutputs(Materials.Water.getFluid(500)).duration(30 * SECONDS).eut(TierEU.RECIPE_LV)
-                .addTo(sCentrifugeRecipes);
+                .addTo(centrifugeRecipes);
     }
 
     @Override

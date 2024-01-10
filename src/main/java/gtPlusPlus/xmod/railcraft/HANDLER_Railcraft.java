@@ -3,7 +3,7 @@ package gtPlusPlus.xmod.railcraft;
 import static gregtech.api.enums.Mods.GTPlusPlus;
 import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
 import static gregtech.api.enums.Mods.Railcraft;
-import static gregtech.api.util.GT_Recipe.GT_Recipe_Map.sFluidExtractionRecipes;
+import static gregtech.api.recipe.RecipeMaps.fluidExtractionRecipes;
 import static gregtech.api.util.GT_RecipeBuilder.SECONDS;
 import static gregtech.api.util.GT_RecipeBuilder.TICKS;
 import static gregtech.api.util.GT_RecipeConstants.UniversalChemical;
@@ -157,8 +157,8 @@ public class HANDLER_Railcraft {
             // Fluid Extracting the Charcoals for Wood Tar
             GT_Values.RA.stdBuilder().itemInputs(aInputs2[i])
                     .itemOutputs(GT_OreDictUnificator.get(OrePrefixes.dust, Materials.Ash, 1L)).outputChances(1000)
-                    .noFluidInputs().fluidOutputs(Materials.WoodTar.getFluid(50L)).duration(1 * SECONDS + 10 * TICKS)
-                    .eut(16).addTo(sFluidExtractionRecipes);
+                    .fluidOutputs(Materials.WoodTar.getFluid(50L)).duration(1 * SECONDS + 10 * TICKS).eut(16)
+                    .addTo(fluidExtractionRecipes);
 
             // Processing the Charcoals with Oxygen to get CO and CO2
             // C + O = CO
